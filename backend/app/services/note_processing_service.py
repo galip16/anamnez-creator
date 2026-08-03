@@ -1,3 +1,4 @@
+from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from app.models.note import Note
@@ -5,9 +6,17 @@ from app.services.anamnesis_service import create_anamnesis
 from app.services.transcription_service import transcribe
 
 
-async def process_audio(audio, db: Session):
+async def process_audio(
+    audio: UploadFile,
+    db: Session,
+):
 
-    note = Note()
+    # Eski kaydı sil
+    db.query(Note).delete()
+    db.commit()
+
+    # Yeni kaydı oluştur
+    note = Note(status="processing")
 
     db.add(note)
     db.commit()
