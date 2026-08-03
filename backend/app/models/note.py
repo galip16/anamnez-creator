@@ -17,6 +17,11 @@ class Note(Base):
         default="processing",
     )
 
+    transcription: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
+
     anamnesis: Mapped[str | None] = mapped_column(
         String,
         nullable=True,

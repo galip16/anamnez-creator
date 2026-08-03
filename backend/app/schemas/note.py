@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class NoteResponse(BaseModel):
     id: int
     status: str
+    transcription: str | None
     anamnesis: str | None
     created_at: datetime
 
