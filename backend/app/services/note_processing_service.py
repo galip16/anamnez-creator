@@ -10,27 +10,38 @@ async def process_audio(
     audio: UploadFile,
     db: Session,
 ):
-
     # Eski kaydı sil
     db.query(Note).delete()
     db.commit()
 
     # Yeni kaydı oluştur
-    note = Note(status="processing")
+    note = Note(status="uploaded")
 
     db.add(note)
     db.commit()
     db.refresh(note)
 
-    transcription = await transcribe(audio)
+    try:
+        note.status = "transcribing"
+        db.commit()
 
-    anamnesis = await create_anamnesis(transcription)
+        transcription = await transcribe(audio)
 
-    note.transcription = transcription
-    note.anamnesis = anamnesis
-    note.status = "ready"
+        note.transcription = transcription
+        note.status = "creating_anamnesis"
+        db.commit()
 
-    db.commit()
-    db.refresh(note)
+        anamnesis = await create_anamnesis(transcription)
 
-    return note
+        note.anamnesis = anamnesis
+        note.status = "ready"
+
+        db.commit()
+        db.refresh(note)
+
+        return note
+
+    except Exception:
+        note.status = "failed"
+        db.commit()
+        raise
