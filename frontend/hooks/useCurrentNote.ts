@@ -4,38 +4,44 @@ import { useEffect, useState } from "react";
 import { getCurrentNote } from "@/lib/api";
 
 export interface Note {
-  id: number;
-  status: string;
-  transcription: string | null;
-  anamnesis: string | null;
-  created_at: string;
+    id: number;
+    status: string;
+    transcription: string | null;
+    anamnesis: string | null;
+    created_at: string;
 }
 
 export default function useCurrentNote() {
-  const [note, setNote] = useState<Note | null>(null);
-  const [loading, setLoading] = useState(true);
+    const [note, setNote] = useState<Note | null>(null);
+    const [loading, setLoading] = useState(true);
 
-  async function loadNote() {
-    try {
-      const data = await getCurrentNote();
-      setNote(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    async function loadNote() {
+        try {
+            const data = await getCurrentNote();
+            setNote(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     }
-  }
 
-  useEffect(() => {
-    loadNote();
+    useEffect(() => {
+        loadNote();
 
-    const interval = setInterval(loadNote, 2000);
+        let interval = 10000;
 
-    return () => clearInterval(interval);
-  }, []);
+        if (note?.status === "processing") {
+            interval = 5000;
+        }
 
-  return {
-    note,
-    loading,
-  };
+        const timer = setInterval(loadNote, interval);
+
+        return () => clearInterval(timer);
+    }, [note?.status]);
+
+    return {
+        note,
+        loading,
+    };
 }
