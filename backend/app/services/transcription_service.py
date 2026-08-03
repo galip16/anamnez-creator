@@ -1,7 +1,4 @@
-from fastapi import UploadFile
-
-
-async def transcribe(audio: UploadFile) -> str:
+async def transcribe(audio_path: str) -> str:
 
     return """
 65 yaş erkek.
